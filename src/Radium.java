@@ -9,5 +9,6 @@ public class Radium {
         // TODO: menus, settings
 
         e = new Engine();
+        e.loop();
     }
 }
