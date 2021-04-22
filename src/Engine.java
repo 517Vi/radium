@@ -1,6 +1,7 @@
 public class Engine {
     Renderer r;
     Settings s;
+    Player p;
     boolean running;
     byte[][] map;
 
@@ -9,9 +10,10 @@ public class Engine {
         this.s = s;
         running = true;
         loadMap();
+        p = new Player(22, 12, -1, 0, 0, 0.66);
     }
 
-    void loadMap() {
+    void loadMap() { // >0 not walkable (walls etc), <= 0 walkable (air, sprites, etc)
         // TODO: Load from txt file
         map = new byte[][] { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
                 { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
