@@ -6,11 +6,11 @@ public class Engine {
     byte[][] map;
 
     public Engine(Settings s) {
-        r = new Renderer();
         this.s = s;
         running = true;
         loadMap();
         p = new Player(22, 12, -1, 0, 0, 0.66);
+        r = new Renderer(s);
     }
 
     void loadMap() { // >0 not walkable (walls etc), <= 0 walkable (air, sprites, etc)
@@ -55,7 +55,7 @@ public class Engine {
         // TODO: Get user input
         // TODO: Update user with input
         // TODO: Update enemies
-        // TODO: Render
+        r.drawFrame();
         System.out.println(deltaT);
     }
 }

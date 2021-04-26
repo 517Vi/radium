@@ -8,6 +8,7 @@ public class Radium {
 
     public Radium() {
         // TODO: menus, settings
+        s = new Settings();
         s.setScreenWidth(640);
         s.setScreenHeight(480);
 
