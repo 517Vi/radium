@@ -13,7 +13,7 @@ public class Engine {
         r = new Renderer(s);
     }
 
-    void loadMap() { // >0 not walkable (walls etc), <= 0 walkable (air, sprites, etc)
+    void loadMap() { // >0 not walkable (walls etc), <= 0 walkable (air, etc)
         // TODO: Load from txt file
         map = new byte[][] { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
                 { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
@@ -55,7 +55,7 @@ public class Engine {
         // TODO: Get user input
         // TODO: Update user with input
         // TODO: Update enemies
-        r.drawFrame();
+        r.drawFrame(p, map);
         System.out.println(deltaT);
     }
 }
