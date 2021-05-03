@@ -2,6 +2,7 @@ public class Engine {
     Renderer r;
     Settings s;
     Player p;
+    InputHandler ih;
     boolean running;
     byte[][] map;
 
@@ -11,6 +12,7 @@ public class Engine {
         loadMap();
         p = new Player(22, 12, -1, 0, 0, 0.66);
         r = new Renderer(s);
+        ih = new InputHandler(s);
     }
 
     void loadMap() { // >0 not walkable (walls etc), <= 0 walkable (air, etc)
@@ -49,13 +51,18 @@ public class Engine {
             update(deltaT);
             lastTime = currentTime;
         }
+        r.dispose();
     }
 
     void update(long deltaT) {
-        // TODO: Get user input
-        // TODO: Update user with input
+        processInput();
         // TODO: Update enemies
         r.drawFrame(p, map);
-        System.out.println(deltaT);
+        // System.out.println(deltaT);
+    }
+
+    void processInput() {
+        if (ih.isPressed("exit"))
+            running = false;
     }
 }
