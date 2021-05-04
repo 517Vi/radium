@@ -21,7 +21,7 @@ public class InputHandler {
                 synchronized (InputHandler.class) {
                     switch (ke.getID()) {
                         case KeyEvent.KEY_PRESSED:
-                            System.out.println(ke.getKeyCode());
+                            // System.out.println(ke.getKeyCode());
                             keysPressed.replace(ke.getKeyCode(), false, true);
                             break;
 

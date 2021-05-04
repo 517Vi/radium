@@ -55,14 +55,46 @@ public class Engine {
     }
 
     void update(long deltaT) {
-        processInput();
+        processInput((double) deltaT / 1000.0);
         // TODO: Update enemies
         r.drawFrame(p, map);
         // System.out.println(deltaT);
     }
 
-    void processInput() {
+    void processInput(double frameTime) {
+        double moveSpeed = frameTime * 5.0;
+        double rotSpeed = frameTime * 3.0;
+
         if (ih.isPressed("exit"))
             running = false;
+
+        if (ih.isPressed("forward")) {
+            if (map[(int) (p.getPosX() + p.getDirX() * moveSpeed)][(int) p.getPosY()] <= 0)
+                p.setPosX(p.getPosX() + p.getDirX() * moveSpeed);
+            if (map[(int) p.getPosX()][(int) (p.getPosY() + p.getDirY() * moveSpeed)] <= 0)
+                p.setPosY(p.getPosY() + p.getDirY() * moveSpeed);
+        }
+        if (ih.isPressed("backward")) {
+            if (map[(int) (p.getPosX() - p.getDirX() * moveSpeed)][(int) p.getPosY()] <= 0)
+                p.setPosX(p.getPosX() - p.getDirX() * moveSpeed);
+            if (map[(int) p.getPosX()][(int) (p.getPosY() - p.getDirY() * moveSpeed)] <= 0)
+                p.setPosY(p.getPosY() - p.getDirY() * moveSpeed);
+        }
+        if (ih.isPressed("right")) {
+            double oldDirX = p.getDirX();
+            p.setDirX(p.getDirX() * Math.cos(-rotSpeed) - p.getDirY() * Math.sin(-rotSpeed));
+            p.setDirY(oldDirX * Math.sin(-rotSpeed) + p.getDirY() * Math.cos(-rotSpeed));
+            double oldPlaneX = p.getPlaneX();
+            p.setPlaneX(p.getPlaneX() * Math.cos(-rotSpeed) - p.getPlaneY() * Math.sin(-rotSpeed));
+            p.setPlaneY(oldPlaneX * Math.sin(-rotSpeed) + p.getPlaneY() * Math.cos(-rotSpeed));
+        }
+        if (ih.isPressed("left")) {
+            double oldDirX = p.getDirX();
+            p.setDirX(p.getDirX() * Math.cos(rotSpeed) - p.getDirY() * Math.sin(rotSpeed));
+            p.setDirY(oldDirX * Math.sin(rotSpeed) + p.getDirY() * Math.cos(rotSpeed));
+            double oldPlaneX = p.getPlaneX();
+            p.setPlaneX(p.getPlaneX() * Math.cos(rotSpeed) - p.getPlaneY() * Math.sin(rotSpeed));
+            p.setPlaneY(oldPlaneX * Math.sin(rotSpeed) + p.getPlaneY() * Math.cos(rotSpeed));
+        }
     }
 }
