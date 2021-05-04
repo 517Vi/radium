@@ -27,6 +27,8 @@ public class Renderer extends JFrame {
 
         BufferedImage bi = new BufferedImage(s.getScreenWidth(), s.getScreenHeight(), BufferedImage.TYPE_INT_ARGB);
         for (int x = 0; x < bi.getWidth(); x++) {
+            for (int y = 0; y < bi.getHeight(); y++)
+                bi.setRGB(x, y, Color.BLACK.getRGB());
             double cameraX = 2 * x / (double) bi.getWidth() - 1;
             double rayDirX = p.getDirX() + p.getPlaneX() * cameraX;
             double rayDirY = p.getDirY() + p.getPlaneY() * cameraX;
@@ -91,21 +93,21 @@ public class Renderer extends JFrame {
 
             Color color;
             switch (map[mapX][mapY]) {
-            case 1:
-                color = Color.RED;
-                break;
-            case 2:
-                color = Color.GREEN;
-                break;
-            case 3:
-                color = Color.BLUE;
-                break;
-            case 4:
-                color = Color.WHITE;
-                break;
-            default:
-                color = Color.YELLOW;
-                break;
+                case 1:
+                    color = Color.RED;
+                    break;
+                case 2:
+                    color = Color.GREEN;
+                    break;
+                case 3:
+                    color = Color.BLUE;
+                    break;
+                case 4:
+                    color = Color.WHITE;
+                    break;
+                default:
+                    color = Color.YELLOW;
+                    break;
             }
 
             if (side == 1) {
