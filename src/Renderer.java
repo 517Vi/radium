@@ -1,13 +1,16 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.*;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JFrame;
+import javax.imageio.ImageIO;
 
 public class Renderer extends JFrame {
     Settings s;
     private final int TEX_SIZE = 64;
-    int[][] texture;
+    BufferedImage[] textures;
 
     public Renderer(Settings s) {
         super("Radium");
@@ -17,23 +20,20 @@ public class Renderer extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
 
-        // Generate textures
-        texture = new int[8][TEX_SIZE * TEX_SIZE];
-        for (int x = 0; x < TEX_SIZE; x++)
-            for (int y = 0; y < TEX_SIZE; y++) {
-                int xorcolor = (int) Math.pow(x * 256 / TEX_SIZE, y * 256 / TEX_SIZE);
-                int xcolor = x * 256 / TEX_SIZE;
-                int ycolor = y * 256 / TEX_SIZE;
-                int xycolor = y * 128 / TEX_SIZE + x * 128 / TEX_SIZE;
-                texture[0][TEX_SIZE * y + x] = 65536 * 254 * ((x != y && x != TEX_SIZE - y) ? 1 : 0);
-                texture[1][TEX_SIZE * y + x] = xycolor + 256 * xycolor + 65536 * xycolor;
-                texture[2][TEX_SIZE * y + x] = 256 * xycolor + 65536 * xycolor;
-                texture[3][TEX_SIZE * y + x] = xorcolor + 256 * xorcolor + 65536 * xorcolor;
-                texture[4][TEX_SIZE * y + x] = 256 * xorcolor;
-                texture[5][TEX_SIZE * y + x] = 65536 * 192 * ((x % 16 == 0 || y % 16 == 0) ? 1 : 0);
-                texture[6][TEX_SIZE * y + x] = 65536 * ycolor;
-                texture[7][TEX_SIZE * y + x] = 0;
-            }
+        try {
+            textures = new BufferedImage[8];
+            textures[0] = ImageIO.read(new File("resources/textures/eagle.png"));
+            textures[1] = ImageIO.read(new File("resources/textures/redbrick.png"));
+            textures[2] = ImageIO.read(new File("resources/textures/purplestone.png"));
+            textures[3] = ImageIO.read(new File("resources/textures/greystone.png"));
+            textures[4] = ImageIO.read(new File("resources/textures/bluestone.png"));
+            textures[5] = ImageIO.read(new File("resources/textures/mossy.png"));
+            textures[6] = ImageIO.read(new File("resources/textures/wood.png"));
+            textures[7] = ImageIO.read(new File("resources/textures/colorstone.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void drawFrame(Player p, byte[][] map) {
@@ -130,7 +130,7 @@ public class Renderer extends JFrame {
             for (int y = drawStart; y < drawEnd; y++) {
                 int texY = (int) texPos & (TEX_SIZE - 1);
                 texPos += step;
-                Color color = new Color(texture[texNum][TEX_SIZE * texY + texX]);
+                Color color = new Color(textures[texNum].getRGB(texX, texY));
                 if (side == 1)
                     color = color.darker();
                 bi.setRGB(x, y, color.getRGB());
