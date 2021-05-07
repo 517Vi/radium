@@ -6,6 +6,8 @@ import javax.swing.JFrame;
 
 public class Renderer extends JFrame {
     Settings s;
+    private final int TEX_SIZE = 64;
+    int[][] texture;
 
     public Renderer(Settings s) {
         super("Radium");
@@ -14,6 +16,24 @@ public class Renderer extends JFrame {
         setSize(s.getScreenWidth(), s.getScreenHeight());
         setLocationRelativeTo(null);
         setVisible(true);
+
+        // Generate textures
+        texture = new int[8][TEX_SIZE * TEX_SIZE];
+        for (int x = 0; x < TEX_SIZE; x++)
+            for (int y = 0; y < TEX_SIZE; y++) {
+                int xorcolor = (int) Math.pow(x * 256 / TEX_SIZE, y * 256 / TEX_SIZE);
+                int xcolor = x * 256 / TEX_SIZE;
+                int ycolor = y * 256 / TEX_SIZE;
+                int xycolor = y * 128 / TEX_SIZE + x * 128 / TEX_SIZE;
+                texture[0][TEX_SIZE * y + x] = 65536 * 254 * ((x != y && x != TEX_SIZE - y) ? 1 : 0);
+                texture[1][TEX_SIZE * y + x] = xycolor + 256 * xycolor + 65536 * xycolor;
+                texture[2][TEX_SIZE * y + x] = 256 * xycolor + 65536 * xycolor;
+                texture[3][TEX_SIZE * y + x] = xorcolor + 256 * xorcolor + 65536 * xorcolor;
+                texture[4][TEX_SIZE * y + x] = 256 * xorcolor;
+                texture[5][TEX_SIZE * y + x] = 65536 * 192 * ((x % 16 == 0 || y % 16 == 0) ? 1 : 0);
+                texture[6][TEX_SIZE * y + x] = 65536 * ycolor;
+                texture[7][TEX_SIZE * y + x] = 0;
+            }
     }
 
     public void drawFrame(Player p, byte[][] map) {
@@ -91,30 +111,28 @@ public class Renderer extends JFrame {
             if (drawEnd >= s.getScreenHeight())
                 drawEnd = s.getScreenHeight() - 1;
 
-            Color color;
-            switch (map[mapX][mapY]) {
-                case 1:
-                    color = Color.RED;
-                    break;
-                case 2:
-                    color = Color.GREEN;
-                    break;
-                case 3:
-                    color = Color.BLUE;
-                    break;
-                case 4:
-                    color = Color.WHITE;
-                    break;
-                default:
-                    color = Color.YELLOW;
-                    break;
-            }
+            int texNum = map[mapX][mapY] - 1;
 
-            if (side == 1) {
-                color = color.darker();
-            }
+            double wallX;
+            if (side == 0)
+                wallX = p.getPosY() + perpWallDist * rayDirY;
+            else
+                wallX = p.getPosX() + perpWallDist * rayDirX;
+            wallX -= Math.floor(wallX);
 
-            for (int y = drawStart; y <= drawEnd; y++) {
+            int texX = (int) (wallX * (double) TEX_SIZE);
+            if ((side == 0 && rayDirX > 0) || (side == 1 && rayDirY < 0))
+                texX = TEX_SIZE - texX - 1;
+
+            double step = 1.0 * TEX_SIZE / lineHeight;
+            double texPos = (drawStart - s.getScreenHeight() / 2 + lineHeight / 2) * step;
+
+            for (int y = drawStart; y < drawEnd; y++) {
+                int texY = (int) texPos & (TEX_SIZE - 1);
+                texPos += step;
+                Color color = new Color(texture[texNum][TEX_SIZE * texY + texX]);
+                if (side == 1)
+                    color = color.darker();
                 bi.setRGB(x, y, color.getRGB());
             }
         }
