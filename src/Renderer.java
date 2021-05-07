@@ -42,13 +42,56 @@ public class Renderer extends JFrame {
             createBufferStrategy(2);
             return;
         }
-
         Graphics g = bs.getDrawGraphics();
-
         BufferedImage bi = new BufferedImage(s.getScreenWidth(), s.getScreenHeight(), BufferedImage.TYPE_INT_ARGB);
+
+        for (int y = 0; y < s.getScreenHeight(); y++) {
+            double rayDirX0 = p.getDirX() - p.getPlaneX();
+            double rayDirY0 = p.getDirY() - p.getPlaneY();
+            double rayDirX1 = p.getDirX() + p.getPlaneX();
+            double rayDirY1 = p.getDirY() + p.getPlaneY();
+
+            int yPos = y - s.getScreenHeight() / 2;
+            double zPos = 0.5 * s.getScreenHeight();
+            double rowDistance = zPos / yPos;
+
+            double floorStepX = rowDistance * (rayDirX1 - rayDirX0) / s.getScreenWidth();
+            double floorStepY = rowDistance * (rayDirY1 - rayDirY0) / s.getScreenWidth();
+            double floorX = p.getPosX() + rowDistance * rayDirX0;
+            double floorY = p.getPosY() + rowDistance * rayDirY0;
+
+            for (int x = 0; x < s.getScreenWidth(); ++x) {
+                int cellX = (int) (floorX);
+                int cellY = (int) (floorY);
+
+                int tx = (int) (TEX_SIZE * (floorX - cellX)) & (TEX_SIZE - 1);
+                int ty = (int) (TEX_SIZE * (floorY - cellY)) & (TEX_SIZE - 1);
+
+                floorX += floorStepX;
+                floorY += floorStepY;
+
+                int floorTexture = 3;
+                int ceilingTexture = 6;
+                Color color;
+
+                color = new Color(textures[floorTexture].getRGB(tx, ty));
+                color = color.darker();
+                color = color.darker();
+                color = color.darker();
+                bi.setRGB(x, y, color.getRGB());
+
+                color = new Color(textures[ceilingTexture].getRGB(tx, ty));
+                color = color.darker();
+                color = color.darker();
+                bi.setRGB(x, s.getScreenHeight() - y - 1, color.getRGB());
+            }
+        }
+
         for (int x = 0; x < bi.getWidth(); x++) {
-            for (int y = 0; y < bi.getHeight(); y++)
-                bi.setRGB(x, y, Color.BLACK.getRGB());
+
+            // for (int y = 0; y < bi.getHeight(); y++)
+            // bi.setRGB(x, y, Color.BLACK.getRGB());
+
             double cameraX = 2 * x / (double) bi.getWidth() - 1;
             double rayDirX = p.getDirX() + p.getPlaneX() * cameraX;
             double rayDirY = p.getDirY() + p.getPlaneY() * cameraX;
