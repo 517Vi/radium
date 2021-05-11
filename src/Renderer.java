@@ -21,15 +21,13 @@ public class Renderer extends JFrame {
         setVisible(true);
 
         try {
-            textures = new BufferedImage[8];
+            textures = new BufferedImage[6];
             textures[0] = ImageIO.read(new File("resources/textures/eagle.png"));
             textures[1] = ImageIO.read(new File("resources/textures/redbrick.png"));
-            textures[2] = ImageIO.read(new File("resources/textures/purplestone.png"));
-            textures[3] = ImageIO.read(new File("resources/textures/greystone.png"));
-            textures[4] = ImageIO.read(new File("resources/textures/bluestone.png"));
-            textures[5] = ImageIO.read(new File("resources/textures/mossy.png"));
-            textures[6] = ImageIO.read(new File("resources/textures/wood.png"));
-            textures[7] = ImageIO.read(new File("resources/textures/colorstone.png"));
+            textures[2] = ImageIO.read(new File("resources/textures/greystone.png"));
+            textures[3] = ImageIO.read(new File("resources/textures/mossy.png"));
+            textures[4] = ImageIO.read(new File("resources/textures/colorstone.png"));
+            textures[5] = ImageIO.read(new File("resources/textures/wood.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -72,7 +70,7 @@ public class Renderer extends JFrame {
                 floorX += floorStepX;
                 floorY += floorStepY;
 
-                int floorTexture = 6;
+                int floorTexture = 5;
                 Color color;
 
                 color = new Color(textures[floorTexture].getRGB(tx, ty));

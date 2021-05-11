@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 public class Engine {
     Renderer r;
     Settings s;
@@ -10,19 +14,22 @@ public class Engine {
         this.s = s;
         running = true;
         loadMap();
-        p = new Player(7, 12, -1, 0, 0, 0.66);
         r = new Renderer(s);
         ih = new InputHandler(s);
     }
 
     void loadMap() { // >0 not walkable (walls etc), <= 0 walkable (air, etc)
-        // TODO: Load from txt file
-        map = new byte[][] { { 2, 2, 2, 2, 1, 2, 2, 2, 2, 4, 6, 4, 0, 0, 6 },
-                { 2, 2, 0, 0, 0, 0, 0, 2, 2, 4, 0, 0, 0, 0, 0 }, { 2, 0, 0, 0, 0, 0, 0, 0, 2, 4, 0, 0, 0, 0, 0 },
-                { 1, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 6 }, { 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 2, 2, 2 },
-                { 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2 }, { 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2 },
-                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2 },
-                { 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2 }, { 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2 } };
+        try {
+            Scanner s = new Scanner(new File("resources/map.txt"));
+            map = new byte[s.nextInt()][s.nextInt()];
+            p = new Player(s.nextInt(), s.nextInt(), -1, 0, 0, 0.66);
+
+            for (int x = 0; x < map.length; x++)
+                for (int y = 0; y < map[x].length; y++)
+                    map[x][y] = (byte) s.nextInt();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public void loop() {
@@ -40,7 +47,7 @@ public class Engine {
         processInput((double) deltaT / 1000.0);
         // TODO: Update enemies
         r.drawFrame(p, map);
-        System.out.println(deltaT);
+        // System.out.println(deltaT);
     }
 
     void processInput(double frameTime) {
