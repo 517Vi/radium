@@ -37,6 +37,7 @@ public class Renderer extends JFrame {
     }
 
     public void drawFrame(Player p, byte[][] map) {
+        // Graphics Boilerplate
         BufferStrategy bs = this.getBufferStrategy();
         if (bs == null) {
             createBufferStrategy(2);
@@ -45,6 +46,7 @@ public class Renderer extends JFrame {
         Graphics g = bs.getDrawGraphics();
         BufferedImage bi = new BufferedImage(s.getScreenWidth(), s.getScreenHeight(), BufferedImage.TYPE_INT_ARGB);
 
+        // Draw floor / ceiling
         for (int y = 0; y < s.getScreenHeight(); y++) {
             double rayDirX0 = p.getDirX() - p.getPlaneX();
             double rayDirY0 = p.getDirY() - p.getPlaneY();
@@ -70,28 +72,18 @@ public class Renderer extends JFrame {
                 floorX += floorStepX;
                 floorY += floorStepY;
 
-                int floorTexture = 3;
-                int ceilingTexture = 6;
+                int floorTexture = 6;
                 Color color;
 
                 color = new Color(textures[floorTexture].getRGB(tx, ty));
                 color = color.darker();
                 color = color.darker();
-                color = color.darker();
                 bi.setRGB(x, y, color.getRGB());
-
-                color = new Color(textures[ceilingTexture].getRGB(tx, ty));
-                color = color.darker();
-                color = color.darker();
-                bi.setRGB(x, s.getScreenHeight() - y - 1, color.getRGB());
             }
         }
 
+        // Draw walls
         for (int x = 0; x < bi.getWidth(); x++) {
-
-            // for (int y = 0; y < bi.getHeight(); y++)
-            // bi.setRGB(x, y, Color.BLACK.getRGB());
-
             double cameraX = 2 * x / (double) bi.getWidth() - 1;
             double rayDirX = p.getDirX() + p.getPlaneX() * cameraX;
             double rayDirY = p.getDirY() + p.getPlaneY() * cameraX;
