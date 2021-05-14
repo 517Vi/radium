@@ -3,6 +3,7 @@ import java.awt.Graphics;
 import java.awt.image.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
 
 import javax.swing.JFrame;
 import javax.imageio.ImageIO;
@@ -11,6 +12,10 @@ public class Renderer extends JFrame {
     Settings s;
     private final int TEX_SIZE = 64;
     BufferedImage[] textures;
+    List<Sprite> sprites;
+    double[] zBuffer;
+    Object[] spriteOrder;
+    double[] spriteDistance;
 
     public Renderer(Settings s) {
         super("Radium");
@@ -21,17 +26,42 @@ public class Renderer extends JFrame {
         setVisible(true);
 
         try {
-            textures = new BufferedImage[6];
+            textures = new BufferedImage[9];
             textures[0] = ImageIO.read(new File("resources/textures/eagle.png"));
             textures[1] = ImageIO.read(new File("resources/textures/redbrick.png"));
             textures[2] = ImageIO.read(new File("resources/textures/greystone.png"));
             textures[3] = ImageIO.read(new File("resources/textures/mossy.png"));
             textures[4] = ImageIO.read(new File("resources/textures/colorstone.png"));
             textures[5] = ImageIO.read(new File("resources/textures/wood.png"));
+            textures[6] = ImageIO.read(new File("resources/sprites/barrel.png"));
+            textures[7] = ImageIO.read(new File("resources/sprites/pillar.png"));
+            textures[8] = ImageIO.read(new File("resources/sprites/greenlight.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        sprites = new ArrayList<Sprite>();
+
+        // Barrels
+        sprites.add(new Sprite(9.5, 12.5, 6));
+        sprites.add(new Sprite(8.5, 12.5, 6));
+        sprites.add(new Sprite(7.5, 12.5, 6));
+
+        // Pillars
+        sprites.add(new Sprite(9.5, 1.5, 7));
+        sprites.add(new Sprite(8.5, 1.5, 7));
+        sprites.add(new Sprite(7.5, 1.5, 7));
+
+        // Lights
+        sprites.add(new Sprite(8.5, 11.5, 8));
+        sprites.add(new Sprite(3.5, 11.5, 8));
+        sprites.add(new Sprite(4.5, 3, 8));
+        sprites.add(new Sprite(7.5, 3, 8));
+
+        spriteOrder = new Integer[sprites.size()];
+        spriteDistance = new double[sprites.size()];
+
+        zBuffer = new double[s.getScreenWidth()];
     }
 
     public void drawFrame(Player p, byte[][] map) {
@@ -167,6 +197,59 @@ public class Renderer extends JFrame {
                 if (side == 1)
                     color = color.darker();
                 bi.setRGB(x, y, color.getRGB());
+            }
+            zBuffer[x] = perpWallDist;
+        }
+
+        for (int i = 0; i < sprites.size(); i++) {
+            spriteOrder[i] = i;
+            spriteDistance[i] = (Math.pow(p.getPosX() - sprites.get(i).getPosX(), 2)
+                    + Math.pow(p.getPosY() - sprites.get(i).getPosY(), 2));
+        }
+
+        {
+            final List<Object> spriteOrderCopy = Arrays.asList(spriteOrder);
+            List<Object> sortedList = new ArrayList<Object>(spriteOrderCopy);
+            Collections.sort(sortedList, Comparator.comparing(s -> spriteDistance[(int) spriteOrderCopy.indexOf(s)]));
+            Collections.reverse(sortedList);
+            spriteOrder = sortedList.toArray();
+
+        }
+        for (int i = 0; i < sprites.size(); i++) {
+            double spriteX = sprites.get((int) spriteOrder[i]).getPosX() - p.getPosX();
+            double spriteY = sprites.get((int) spriteOrder[i]).getPosY() - p.getPosY();
+
+            double invDet = 1.0 / (p.getPlaneX() * p.getDirY() - p.getDirX() * p.getPlaneY());
+            double transformX = invDet * (p.getDirY() * spriteX - p.getDirX() * spriteY);
+            double transformY = invDet * (-p.getPlaneY() * spriteX + p.getPlaneX() * spriteY);
+            int spriteScreenX = (int) ((s.getScreenWidth() / 2) * (1 + transformX / transformY));
+
+            int spriteHeight = Math.abs((int) (s.getScreenHeight() / transformY));
+            int drawStartY = -spriteHeight / 2 + s.getScreenHeight() / 2;
+            if (drawStartY < 0)
+                drawStartY = 0;
+            int drawEndY = spriteHeight / 2 + s.getScreenHeight() / 2;
+            if (drawEndY >= s.getScreenHeight())
+                drawEndY = s.getScreenHeight() - 1;
+
+            int spriteWidth = Math.abs((int) (s.getScreenHeight() / (transformY)));
+            int drawStartX = -spriteWidth / 2 + spriteScreenX;
+            if (drawStartX < 0)
+                drawStartX = 0;
+            int drawEndX = spriteWidth / 2 + spriteScreenX;
+            if (drawEndX >= s.getScreenWidth())
+                drawEndX = s.getScreenWidth() - 1;
+
+            for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
+                int texX = (int) (256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * TEX_SIZE / spriteWidth) / 256;
+                if (transformY > 0 && stripe > 0 && stripe < s.getScreenWidth() && transformY < zBuffer[stripe])
+                    for (int y = drawStartY; y < drawEndY; y++) {
+                        int d = (y) * 256 - s.getScreenHeight() * 128 + spriteHeight * 128;
+                        int texY = ((d * TEX_SIZE) / spriteHeight) / 256;
+                        int color = textures[sprites.get((int) spriteOrder[i]).getSprite()].getRGB(texX, texY);
+                        if ((color & 0x00FFFFFF) != 0)
+                            bi.setRGB(stripe, y, color);
+                    }
             }
         }
 
