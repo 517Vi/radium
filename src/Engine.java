@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Engine {
@@ -9,12 +11,13 @@ public class Engine {
     InputHandler ih;
     boolean running;
     byte[][] map;
+    List<Sprite> sprites;
 
     public Engine(Settings s) {
         this.s = s;
         running = true;
         loadMap();
-        r = new Renderer(s);
+        r = new Renderer(s, sprites);
         ih = new InputHandler(s);
     }
 
@@ -27,6 +30,11 @@ public class Engine {
             for (int x = 0; x < map.length; x++)
                 for (int y = 0; y < map[x].length; y++)
                     map[x][y] = (byte) s.nextInt();
+
+            sprites = new ArrayList<>();
+            while (s.hasNext()) {
+                sprites.add(new Sprite(s.nextDouble(), s.nextDouble(), s.nextInt()));
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

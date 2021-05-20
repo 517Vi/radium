@@ -17,7 +17,7 @@ public class Renderer extends JFrame {
     Object[] spriteOrder;
     double[] spriteDistance;
 
-    public Renderer(Settings s) {
+    public Renderer(Settings s, List<Sprite> sprites) {
         super("Radium");
         this.s = s;
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -40,23 +40,7 @@ public class Renderer extends JFrame {
             e.printStackTrace();
         }
 
-        sprites = new ArrayList<Sprite>();
-
-        // Barrels
-        sprites.add(new Sprite(9.5, 12.5, 6));
-        sprites.add(new Sprite(8.5, 12.5, 6));
-        sprites.add(new Sprite(7.5, 12.5, 6));
-
-        // Pillars
-        sprites.add(new Sprite(9.5, 1.5, 7));
-        sprites.add(new Sprite(8.5, 1.5, 7));
-        sprites.add(new Sprite(7.5, 1.5, 7));
-
-        // Lights
-        sprites.add(new Sprite(8.5, 11.5, 8));
-        sprites.add(new Sprite(3.5, 11.5, 8));
-        sprites.add(new Sprite(4.5, 3, 8));
-        sprites.add(new Sprite(7.5, 3, 8));
+        this.sprites = sprites;
 
         spriteOrder = new Integer[sprites.size()];
         spriteDistance = new double[sprites.size()];
