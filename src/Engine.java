@@ -25,7 +25,7 @@ public class Engine {
         try {
             Scanner s = new Scanner(new File("resources/map.txt"));
             map = new byte[s.nextInt()][s.nextInt()];
-            p = new Player(s.nextInt(), s.nextInt(), -1, 0, 0, 0.66);
+            p = new Player(s.nextDouble(), s.nextDouble(), -1, 0, 0, 0.66);
 
             for (int x = 0; x < map.length; x++)
                 for (int y = 0; y < map[x].length; y++)
