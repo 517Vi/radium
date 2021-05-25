@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import javax.swing.JOptionPane;
 
 public class Engine {
     Renderer r;
@@ -48,22 +49,41 @@ public class Engine {
             update(deltaT);
             lastTime = currentTime;
         }
+        boolean winning = true;
+        for (Sprite s : sprites)
+            if (s.getSprite() > 8)
+                winning = false;
+        if (winning)
+            JOptionPane.showMessageDialog(null, "You win!", "Game Over", JOptionPane.PLAIN_MESSAGE);
+        else
+            JOptionPane.showMessageDialog(null, "You lose!", "Game Over", JOptionPane.PLAIN_MESSAGE);
         r.dispose();
     }
 
     void update(long deltaT) {
         processInput((double) deltaT / 1000.0);
-        // TODO: Update enemies
-        r.drawFrame(p, map);
+        checkEnemies();
+        r.drawFrame(p, map, ih);
         // System.out.println(deltaT);
+    }
+
+    void checkEnemies() {
+        for (Sprite sprite : sprites) {
+            if (sprite.getSprite() > 8) {
+                if (Math.sqrt(Math.abs(Math.pow(p.getPosX() - sprite.getPosX(), 2)
+                        + Math.pow(p.getPosY() - sprite.getPosY(), 2))) < 0.8)
+                    running = false;
+            }
+        }
     }
 
     void processInput(double frameTime) {
         double moveSpeed = frameTime * 5.0;
         double rotSpeed = frameTime * 3.0;
 
-        if (ih.isPressed("exit"))
+        if (ih.isPressed("exit")) {
             running = false;
+        }
 
         if (ih.isPressed("forward")) {
             if (map[(int) (p.getPosX() + p.getDirX() * moveSpeed)][(int) p.getPosY()] <= 0)

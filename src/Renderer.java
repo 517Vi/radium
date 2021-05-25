@@ -26,7 +26,7 @@ public class Renderer extends JFrame {
         setVisible(true);
 
         try {
-            textures = new BufferedImage[9];
+            textures = new BufferedImage[10];
             textures[0] = ImageIO.read(new File("resources/textures/eagle.png"));
             textures[1] = ImageIO.read(new File("resources/textures/redbrick.png"));
             textures[2] = ImageIO.read(new File("resources/textures/greystone.png"));
@@ -36,6 +36,7 @@ public class Renderer extends JFrame {
             textures[6] = ImageIO.read(new File("resources/sprites/barrel.png"));
             textures[7] = ImageIO.read(new File("resources/sprites/pillar.png"));
             textures[8] = ImageIO.read(new File("resources/sprites/greenlight.png"));
+            textures[9] = ImageIO.read(new File("resources/sprites/enemy.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -48,7 +49,7 @@ public class Renderer extends JFrame {
         zBuffer = new double[s.getScreenWidth()];
     }
 
-    public void drawFrame(Player p, byte[][] map) {
+    public void drawFrame(Player p, byte[][] map, InputHandler ih) {
         // Graphics Boilerplate
         BufferStrategy bs = this.getBufferStrategy();
         if (bs == null) {
@@ -199,44 +200,58 @@ public class Renderer extends JFrame {
             spriteOrder = sortedList.toArray();
 
         }
-        for (int i = 0; i < sprites.size(); i++) {
-            double spriteX = sprites.get((int) spriteOrder[i]).getPosX() - p.getPosX();
-            double spriteY = sprites.get((int) spriteOrder[i]).getPosY() - p.getPosY();
 
-            double invDet = 1.0 / (p.getPlaneX() * p.getDirY() - p.getDirX() * p.getPlaneY());
-            double transformX = invDet * (p.getDirY() * spriteX - p.getDirX() * spriteY);
-            double transformY = invDet * (-p.getPlaneY() * spriteX + p.getPlaneX() * spriteY);
-            int spriteScreenX = (int) ((s.getScreenWidth() / 2) * (1 + transformX / transformY));
+        try {
 
-            int spriteHeight = Math.abs((int) (s.getScreenHeight() / transformY));
-            int drawStartY = -spriteHeight / 2 + s.getScreenHeight() / 2;
-            if (drawStartY < 0)
-                drawStartY = 0;
-            int drawEndY = spriteHeight / 2 + s.getScreenHeight() / 2;
-            if (drawEndY >= s.getScreenHeight())
-                drawEndY = s.getScreenHeight() - 1;
+            for (int i = 0; i < sprites.size(); i++) {
+                double spriteX = sprites.get((int) spriteOrder[i]).getPosX() - p.getPosX();
+                double spriteY = sprites.get((int) spriteOrder[i]).getPosY() - p.getPosY();
 
-            int spriteWidth = Math.abs((int) (s.getScreenHeight() / (transformY)));
-            int drawStartX = -spriteWidth / 2 + spriteScreenX;
-            if (drawStartX < 0)
-                drawStartX = 0;
-            int drawEndX = spriteWidth / 2 + spriteScreenX;
-            if (drawEndX >= s.getScreenWidth())
-                drawEndX = s.getScreenWidth() - 1;
+                double invDet = 1.0 / (p.getPlaneX() * p.getDirY() - p.getDirX() * p.getPlaneY());
+                double transformX = invDet * (p.getDirY() * spriteX - p.getDirX() * spriteY);
+                double transformY = invDet * (-p.getPlaneY() * spriteX + p.getPlaneX() * spriteY);
+                int spriteScreenX = (int) ((s.getScreenWidth() / 2) * (1 + transformX / transformY));
 
-            for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
-                int texX = (int) (256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * TEX_SIZE / spriteWidth) / 256;
-                if (transformY > 0 && stripe > 0 && stripe < s.getScreenWidth() && transformY < zBuffer[stripe])
-                    for (int y = drawStartY; y < drawEndY; y++) {
-                        int d = (y) * 256 - s.getScreenHeight() * 128 + spriteHeight * 128;
-                        int texY = ((d * TEX_SIZE) / spriteHeight) / 256;
-                        int color = textures[sprites.get((int) spriteOrder[i]).getSprite()].getRGB(texX, texY);
-                        if ((color & 0x00FFFFFF) != 0)
-                            bi.setRGB(stripe, y, color);
-                    }
+                int spriteHeight = Math.abs((int) (s.getScreenHeight() / transformY));
+                int drawStartY = -spriteHeight / 2 + s.getScreenHeight() / 2;
+                if (drawStartY < 0)
+                    drawStartY = 0;
+                int drawEndY = spriteHeight / 2 + s.getScreenHeight() / 2;
+                if (drawEndY >= s.getScreenHeight())
+                    drawEndY = s.getScreenHeight() - 1;
+
+                int spriteWidth = Math.abs((int) (s.getScreenHeight() / (transformY)));
+                int drawStartX = -spriteWidth / 2 + spriteScreenX;
+                if (drawStartX < 0)
+                    drawStartX = 0;
+                int drawEndX = spriteWidth / 2 + spriteScreenX;
+                if (drawEndX >= s.getScreenWidth())
+                    drawEndX = s.getScreenWidth() - 1;
+
+                for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
+                    int texX = (int) (256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * TEX_SIZE / spriteWidth)
+                            / 256;
+                    if (transformY > 0 && stripe > 0 && stripe < s.getScreenWidth() && transformY < zBuffer[stripe])
+                        for (int y = drawStartY; y < drawEndY; y++) {
+                            int d = (y) * 256 - s.getScreenHeight() * 128 + spriteHeight * 128;
+                            int texY = ((d / spriteHeight) * TEX_SIZE) / 256;
+                            int color = textures[sprites.get((int) spriteOrder[i]).getSprite()].getRGB(texX, texY);
+                            if ((color & 0x00FFFFFF) != 0)
+                                bi.setRGB(stripe, y, color);
+                            if (sprites.get((int) spriteOrder[i]).getSprite() > 8) { // if enemy is drawn
+                                if (stripe == s.getScreenWidth() / 2 && y == s.getScreenHeight() / 2)
+                                    if (ih.isPressed("shoot")) {
+                                        sprites.remove((int) spriteOrder[i]);
+                                    }
+                                Sprite sprite = sprites.get((int) spriteOrder[i]);
+                                sprite.setPosX(sprite.getPosX() + (p.getPosX() - sprite.getPosX()) / 450000.0);
+                                sprite.setPosY(sprite.getPosY() + (p.getPosY() - sprite.getPosY()) / 450000.0);
+                            }
+                        }
+                }
             }
+        } catch (IndexOutOfBoundsException e) {
         }
-
         g.drawImage(bi, 0, 0, null);
         g.dispose();
         bs.show();

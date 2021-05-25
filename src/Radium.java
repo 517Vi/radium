@@ -7,7 +7,6 @@ public class Radium {
     }
 
     public Radium() {
-        // TODO: menus
 
         s = new Settings();
 
@@ -19,6 +18,7 @@ public class Radium {
         s.putKey("backward", 83);
         s.putKey("right", 68);
         s.putKey("exit", 27);
+        s.putKey("shoot", 32);
 
         e = new Engine(s);
         e.loop();

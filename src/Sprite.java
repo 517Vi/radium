@@ -4,20 +4,29 @@ public class Sprite {
     private int sprite;
 
     public Sprite(double posX, double posY, int sprite) {
-        this.posX = posX;
-        this.posY = posY;
+        this.setPosX(posX);
+        this.setPosY(posY);
         this.sprite = sprite;
     }
 
-    public double getPosX() {
-        return posX;
+    public int getSprite() {
+        return sprite;
     }
 
     public double getPosY() {
         return posY;
     }
 
-    public int getSprite() {
-        return sprite;
+    public void setPosY(double posY) {
+        this.posY = posY;
     }
+
+    public double getPosX() {
+        return posX;
+    }
+
+    public void setPosX(double posX) {
+        this.posX = posX;
+    }
+
 }
