@@ -10,8 +10,8 @@ public class Radium {
 
         s = new Settings();
 
-        s.setScreenWidth(640);
-        s.setScreenHeight(480);
+        s.setScreenWidth(960);
+        s.setScreenHeight(720);
 
         s.putKey("forward", 87);
         s.putKey("left", 65);
